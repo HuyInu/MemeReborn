@@ -3,7 +3,7 @@
     <div class="health-bar">
         <div class="health"
               :style="{'width':currentHPPercent + '%'}">
-          {{ this.currentHP }}
+          {{ currentHP }} / {{ maxHP }}
         </div>
         
     </div>
@@ -27,7 +27,11 @@ export default {
   },
   watch: {
     hpChangeActionProp () {
-      Promise.resolve(this.changeHPAction()).then(this.endTurn())
+      Promise.resolve(
+        this.changeHPAction()
+      ).then(
+        setTimeout(() => this.endTurn(), 500)
+      )
     },
     currentHP () {
       this.calcCurrentHPPercent()
@@ -49,8 +53,8 @@ export default {
       })
     },
     reduceHP (dmg) {
+      console.log(dmg)
       this.currentHP -= dmg
-      console.log(dmg + '-' + this.currentHP)
     },
     recoverHP (heal) {
       if (this.currentHP + heal >= this.maxHP) {

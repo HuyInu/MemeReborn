@@ -5,7 +5,6 @@
             :src="require('@/assets/CardImg/'+cardProp.name)"
             :id="cardProp.id"
             @click="cardClick"
-            v-on:click-outside="cardUnClicked()"
             />
     </div>
   </div>
@@ -14,11 +13,12 @@
 <script>
 export default {
   name: 'CardTemplate',
-  props: ['cardProp'],
+  props: ['cardProp', 'idInDeckProp'],
   data (props) {
     const isClicked = false
+
     const cardSkill = {
-      id: props.cardProp.id,
+      id: props.idInDeckProp,
       type: props.cardProp.type,
       val: props.cardProp.val
     }
@@ -46,7 +46,7 @@ export default {
       this.sendCardSkill()
     },
     cardClicked () {
-      this.isClicked = true
+      this.isClicked = !this.isClicked
     },
     cardUnClicked (event) {
       
@@ -75,7 +75,7 @@ export default {
 }
 @media only screen and (max-width: 500px) {
   .card-frame :hover {
-  outline: none;
+    outline: none;
   }
 }
 .card-clicked {

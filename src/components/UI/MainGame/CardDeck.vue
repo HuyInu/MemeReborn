@@ -10,9 +10,10 @@
           </div>
           <div class="card-show col-lg">
             <Card class="card-object" 
-              v-for="(card,index) in cardList" 
+              v-for="(card,index) in cardDeckProp" 
               :key="index" 
               :cardProp="card"
+              :idInDeckProp="index"
               @cardSkill="addCardSkillToCombo"
               />
           </div>
@@ -20,7 +21,7 @@
       </div>
       <div class="card-deck-footer">
         <CardCounter 
-              :cardAmountProp="cardAmount"
+              :cardAmountProp="cardAmountProp"
                 />
       </div>
     </div>
@@ -37,41 +38,19 @@ export default {
     Card,
     CardCounter
   },
-  data () {
-    const cardAmount = 0
+  props: ['cardDeckProp', 'cardAmountProp'],
+  data (props) {
+    // const cardAmount = 0
     const actionCombo = []
     return {
-      cardList: [
-        {
-          id: 1,
-          name: 'normalAtk.jpg',
-          rank: 'a',
-          type: 'atk',
-          val: 5
-        },
-        {
-          id: 2,
-          name: 'normalHeal.jpg',
-          rank: 'a',
-          type: 'heal',
-          val: 7
-        },
-        {
-          id: 3,
-          name: 'normalAtk.jpg',
-          rank: 'a',
-          type: 'atk',
-          val: 7
-        }
-      ],
-      cardAmount,
+      // cardList: props.cardDeckProp,
+      // cardAmount,
       actionCombo
     }
   },
+  watch: {
+  },
   methods: {
-    countCardAmount () {
-      this.cardAmount = this.cardList.length
-    },
     addCardSkillToCombo (cardSkill) {
       if (this.checkExistedCard(this.actionCombo, cardSkill.id)) {
         this.actionCombo.push(cardSkill)
@@ -100,7 +79,6 @@ export default {
     }
   },
   created () {
-    this.countCardAmount()
   }
 }
 </script>

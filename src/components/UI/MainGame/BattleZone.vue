@@ -19,6 +19,11 @@
           <EnermyChar class="col"/>
         </div>
       </div>
+      <button @click="takeCardToDeck()">test</button>
+      <button @click="resetCardDeck()">clear</button>
+      <CardDeck @actionCombo="sendActionCombo"
+                :cardDeckProp="cardDeckList"
+                :cardAmountProp="cardDeckAmount"/>
   </div>
 </template>
 
@@ -26,14 +31,16 @@
 import Player from '@/components/GameObject/Player.vue'
 import EnermyChar from '@/components/GameObject/EnermyChar.vue'
 import HpBar from '@/components/UI/MainGame/HpBar.vue'
+import CardDeck from '@/components/UI/MainGame/CardDeck.vue'
 
 export default {
   name: 'MainPlayer',
-  props: ['comboProp'],
+  props: [''],
   components: {
     Player,
     EnermyChar,
-    HpBar
+    HpBar,
+    CardDeck
   },
   data () {
     const gameData = {
@@ -45,12 +52,50 @@ export default {
         skill: [
           {
             type: 'atk',
-            val: 12
+            val: 10
           }
         ]
-      }
+      },
+      cardList: [
+        {
+          id: 1,
+          name: 'normalAtk.jpg',
+          rank: 'a',
+          type: 'atk',
+          val: 5
+        },
+        {
+          id: 2,
+          name: 'normalHeal.jpg',
+          rank: 'a',
+          type: 'heal',
+          val: 7
+        },
+        {
+          id: 3,
+          name: 'midAtk.jpg',
+          rank: 'a',
+          type: 'atk',
+          val: 7
+        },
+        {
+          id: 4,
+          name: 'strongAtk.jpg',
+          rank: 's',
+          type: 'atk',
+          val: 10
+        },
+        {
+          id: 5,
+          name: '+1.jpg',
+          rank: 'a',
+          type: 'card+',
+          val: 10
+        }
+      ]
     }
-
+    const cardDeckList = []
+    const cardDeckAmount = 3
     const gameTurn = 0
 
     const playerHPChangeAction = []
@@ -64,27 +109,30 @@ export default {
       enermyHPChangeAction,
       playerBuff,
       enermyAtkList,
-      gameTurn
+      gameTurn,
+      cardDeckList,
+      cardDeckAmount
     }
   },
   watch: {
-    comboProp () {
-      this.playerAction()
-    }
   },
   created () {
-   
+    this.takeCardToDeck()
   },
   methods: {
-    playerAction () {
+    playerAction (actionCombo) {
       this.resetGameTurn()
-      this.comboProp.forEach(element => {
+      actionCombo.forEach(element => {
         switch (element.type) {
           case 'atk':
             this.enermyHPChangeAction.push(element)
             break
           case 'heal':
             this.playerHPChangeAction.push(element)
+            break
+          case 'card+':
+            this.cardDeckAmount++
+            break
         }
       })
     },
@@ -105,19 +153,30 @@ export default {
       this.enermyHPChangeAction = []
     },
     finishedAction () {
-      console.log(this.gameTurn)
       this.gameTurn++
       if (this.gameTurn === 4) {
         this.gameTurn = 0
         alert('your turn')
+        this.takeCardToDeck()
       } 
       if (this.gameTurn === 2) {
         alert('enermy turn')
         this.enermyAction(this.gameData.enermyData.skill)
       }
     },
-    enermyFinishedTurn () {
-
+    sendActionCombo (actionCombo) {
+      this.playerAction(actionCombo)
+    },
+    takeCardToDeck () {
+      Promise.resolve(this.resetCardDeck()).then(() => {
+        for (let i = 1; i <= this.cardDeckAmount; i++) {
+          const randomIndex = Math.floor(Math.random() * this.gameData.cardList.length)
+          this.cardDeckList.push(this.gameData.cardList[randomIndex])
+        }
+      })
+    },
+    resetCardDeck () {
+      this.cardDeckList = []
     }
   }
 }
