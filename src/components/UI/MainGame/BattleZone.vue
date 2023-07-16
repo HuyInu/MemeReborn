@@ -5,7 +5,8 @@
           <HpBar class="player-hp col "
                   :hpChangeActionProp="playerHPChangeAction"
                   :dataProp="gameData.playerData"
-                  @finishedTurn="finishedAction()"/>
+                  @finishedTurn="finishedAction()"
+                  @effectValue="getEffectValueHP"/>
           <div class="col "></div>
           <HpBar class="enermy-hp col"
                 :hpChangeActionProp="enermyHPChangeAction"
@@ -13,14 +14,17 @@
                 @finishedTurn="finishedAction()"/>
         </div>
       </div>
-      <div class="battle-zone" :style="{ 'background-image': 'url(' + require('@/assets/Scene/1.jpg') + ')' }">
+      <div class="battle-zone" :style="{ 'background-image': 'url(' + require('@/assets/Scene/2.gif') + ')' }">
         <div class="row char-zone">
-          <Player class="player col"/>
-          <EnermyChar class="col"/>
+          <Player class="chara col" />
+          <EnermyChar class="chara col"/>
+        </div>
+        <div class="row effect-value-zone ">
+          <p class="point col animate__bounceIn effect-value" v-show="effectValue != 0">{{effectValue}}</p>
+          <p class="point col animate__bounceIn effect-value">abc</p>
         </div>
       </div>
-      <button @click="takeCardToDeck()">test</button>
-      <button @click="resetCardDeck()">clear</button>
+      <!-- Card deck -->
       <CardDeck @actionCombo="sendActionCombo"
                 :cardDeckProp="cardDeckList"
                 :cardAmountProp="cardDeckAmount"/>
@@ -60,48 +64,79 @@ export default {
         {
           id: 1,
           name: 'normalAtk.jpg',
-          rank: 'a',
-          type: 'atk',
-          val: 5
+          rank: 'b',
+          description: 'Cause',
+          effect: [
+            {
+              type: 'atk',
+              val: 5
+            }
+          ]
         },
         {
           id: 2,
           name: 'normalHeal.jpg',
           rank: 'a',
-          type: 'heal',
-          val: 7
+          description: 'Cause',
+          effect: [
+            {
+              type: 'heal',
+              val: 7
+            }
+          ]
         },
         {
           id: 3,
           name: 'midAtk.jpg',
-          rank: 'a',
-          type: 'atk',
-          val: 7
+          rank: 's',
+          description: 'Cause',
+          effect: [
+            {
+              type: 'atk',
+              val: 7
+            }
+          ]
         },
         {
           id: 4,
           name: 'strongAtk.jpg',
-          rank: 's',
-          type: 'atk',
-          val: 10
+          rank: 'ss',
+          description: '<p>Cause </p>',
+          effect: [
+            {
+              type: 'atk',
+              val: 5
+            },
+            {
+              type: 'heal',
+              val: 10
+            }
+          ]
         },
         {
           id: 5,
           name: '+1.jpg',
-          rank: 'a',
-          type: 'card+',
-          val: 10
+          rank: 'sss',
+          description: '<p>abc<\/p>',
+          effect: [
+            {
+              type: 'card+',
+              val: 1
+            }
+          ]
         }
       ]
     }
     const cardDeckList = []
-    const cardDeckAmount = 3
+    const cardDeckAmount = 4
     const gameTurn = 0
 
     const playerHPChangeAction = []
     const playerBuff = []
     const enermyHPChangeAction = []
     const enermyAtkList = []
+
+    const effectValue = 0
 
     return {
       gameData,
@@ -111,7 +146,8 @@ export default {
       enermyAtkList,
       gameTurn,
       cardDeckList,
-      cardDeckAmount
+      cardDeckAmount,
+      effectValue
     }
   },
   watch: {
@@ -121,20 +157,27 @@ export default {
   },
   methods: {
     playerAction (actionCombo) {
-      this.resetGameTurn()
-      actionCombo.forEach(element => {
-        switch (element.type) {
-          case 'atk':
-            this.enermyHPChangeAction.push(element)
-            break
-          case 'heal':
-            this.playerHPChangeAction.push(element)
-            break
-          case 'card+':
-            this.cardDeckAmount++
-            break
-        }
+      const enermyHPChangeAction = []
+      const playerHPChangeAction = []
+      // this.resetGameTurn()
+      actionCombo.forEach(card => {
+        card.effect.forEach(effect => {
+          switch (effect.type) {
+            case 'atk':
+              enermyHPChangeAction.push(effect)
+              break
+            case 'heal':
+              playerHPChangeAction.push(effect)
+              break
+            case 'card+':
+              this.cardDeckAmount++
+              this.gameTurn++
+              break
+          }
+        })
       })
+      this.enermyHPChangeAction = enermyHPChangeAction
+      this.playerHPChangeAction = playerHPChangeAction
     },
     enermyAction (enermyAction) {
       this.resetGameTurn()
@@ -154,6 +197,7 @@ export default {
     },
     finishedAction () {
       this.gameTurn++
+      // 4 and 2 bcause two HP component return finish
       if (this.gameTurn === 4) {
         this.gameTurn = 0
         alert('your turn')
@@ -177,6 +221,15 @@ export default {
     },
     resetCardDeck () {
       this.cardDeckList = []
+    },
+    getEffectValueHP (value) {
+      Promise.resolve(
+        this.effectValue = value
+      ).then(
+        setTimeout(() => {
+          this.effectValue = 0
+        }, 500)
+      )
     }
   }
 }
@@ -188,12 +241,13 @@ export default {
   margin: 5px 0 5px 0;
 }
 .battle-zone{
+  overflow: hidden;
   align-items: center;
   background-size:cover;
   background-repeat: no-repeat;
   background-position: center;
   height: 500px;
-  /* position: relative; */
+  position: relative;
 }
 .char-zone{
   padding: 20px 0 20px 0;
@@ -201,8 +255,9 @@ export default {
   align-items: center;
   height: 100%;
 }
-.player{
-
+.chara{
+  margin-top: 100px;
+  scale: 1.2;
 }
 .pg{
   object-fit: cover;
@@ -211,5 +266,16 @@ export default {
   .battle-zone {
     height: 400px;
   }
+}
+.effect-value-zone{
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+}
+.effect-value{
+  font-size: 3em;
+  color: rgb(251, 255, 14);
 }
 </style>

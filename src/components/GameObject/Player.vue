@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div class="playerContainer">
     <img class="img-fluid charaIdleAnime" width="300" 
           src="@/assets/Character/Chad.png" 
           alt="">

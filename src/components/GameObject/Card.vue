@@ -1,49 +1,51 @@
 <template>
   <div>
+    <span v-html="cardProp.description"></span>
+    <RankText class="cardRankText" :rankProps="cardProp.rank"/>
     <div :class="['card-frame',isClicked ? 'card-clicked' : '']">
         <img  :class="['card-pic',getCardBorderColor(cardProp.rank)]" 
             :src="require('@/assets/CardImg/'+cardProp.name)"
             :id="cardProp.id"
             @click="cardClick"
-            />
+            />       
+    </div>
+    <div class="de-buff">
+      <img v-for="(cardEffect, index) in cardProp.effect" :key="index" width="30px" :src="require('@/assets/De-Buff/'+cardEffect.type+'.png')">
     </div>
   </div>
 </template>
 
 <script>
+import RankText from '@/components/GameObject/RankText.vue'
+
 export default {
   name: 'CardTemplate',
   props: ['cardProp', 'idInDeckProp'],
+  components: { RankText },
   data (props) {
     const isClicked = false
 
-    const cardSkill = {
+    const cardInfo = {
       id: props.idInDeckProp,
       type: props.cardProp.type,
-      val: props.cardProp.val
+      val: props.cardProp.val,
+      effect: props.cardProp.effect
     }
     return {
       isClicked,
-      cardSkill
+      cardInfo
     }
   },
   methods: {
     getCardBorderColor (cardRank) {
-      switch (cardRank) {
-        case 'a' :
-          return 'rank-a'
-        case 's' :
-          return 'rank-s'
-        default :
-          return 'rank-a'
-      }
+      return 'rank-' + cardRank
     },
     cardHover () {
       
     },
     cardClick () {
       this.cardClicked()
-      this.sendCardSkill()
+      this.sendCardInfo()
     },
     cardClicked () {
       this.isClicked = !this.isClicked
@@ -51,8 +53,11 @@ export default {
     cardUnClicked (event) {
       
     },
-    sendCardSkill () {
-      this.$emit('cardSkill', this.cardSkill)
+    sendCardInfo () {
+      this.$emit('CardInfo', this.cardInfo)
+    },
+    cardDescriptionShow () {
+      
     }
   }
 }
@@ -70,7 +75,6 @@ export default {
 .card-frame :hover {
   transition: outline .2s;
   outline: 8px solid rgb(255, 184, 211);
-  z-index: 1;
   position: relative;
 }
 @media only screen and (max-width: 500px) {
@@ -81,19 +85,39 @@ export default {
 .card-clicked {
   outline: 8px solid rgb(255, 93, 93);
   border-radius: 10px;
-  z-index: 2;
   position: relative;
-  
 }
 .card-pic{
-    padding: 2px;
-    border-radius: 10px;
-    border: 4px
+  border-radius: 10px;
+  border-width: 4px;
+}
+.cardRankText{
+  position: absolute;
+  z-index: 1;
+  font-size: 2vw;
+}
+.rank-b{
+  border-style: solid ;
+  border-color: rgb(105, 64, 3);
 }
 .rank-a{
-    border: solid rgb(105, 64, 3);
+  border-style: solid ;
+  border-color: rgb(165 165 165);
 }
 .rank-s{
-    border: solid rgb(232, 255, 29);
+  border-style: solid ;
+  border-color: rgb(247, 163, 38);
+}
+.rank-ss{
+  border-style: solid ;
+  border-color: rgb(182, 211, 15);
+}
+.rank-sss{
+  border-style: solid ;
+  border-color: rgb(251, 255, 10);
+}
+.rank-l{
+  border-style: solid ;
+  border-color: rgb(241, 255, 164);
 }
 </style>
