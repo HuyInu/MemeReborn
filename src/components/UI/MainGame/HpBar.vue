@@ -47,8 +47,8 @@ export default {
     },
     changeHPAction () {
       return new Promise((resolve, reject) => {
+        this.fetchActionArray()
         setTimeout(async () => {
-          await this.fetchActionArray()
           console.log('end action')
           await resolve()
           console.log(1000 * this.hpChangeActionProp.length)
@@ -71,13 +71,14 @@ export default {
             // await this.sendEffectValue(skill.val) 
             console.log(500 * (index + 1))
             await this.calcCurrentHPPercent()
+            await this.sendEffectValue(skill)
             i++
+            if (i === this.hpChangeActionProp.length - 1 | i !== 0) {
+              console.log('while')
+              resolve()
+            }
           }, 500 * (index + 1))
         })
-        while (i === this.hpChangeActionProp.length - 1) {
-          console.log('while')
-          resolve()
-        }
       })
     },
     reduceHP (dmg) {

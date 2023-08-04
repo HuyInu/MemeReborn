@@ -6,22 +6,30 @@
                   :hpChangeActionProp="playerHPChangeAction"
                   :dataProp="gameData.playerData"
                   @finishedTurn="finishedAction()"
-                  @effectValue="getEffectValueHP"/>
+                  @effectValue="showEffectHPPlayer"/>
           <div class="col "></div>
           <HpBar class="enermy-hp col"
                 :hpChangeActionProp="enermyHPChangeAction"
                 :dataProp="gameData.enermyData" 
-                @finishedTurn="finishedAction()"/>
+                @finishedTurn="finishedAction()"
+                @effectValue="showEffectHPEnermy"/>
         </div>
       </div>
+      <b-modal ref="modal-1" title="BootstrapVue">
+        <p class="my-4">Hello from modal!</p>
+      </b-modal>
       <div class="battle-zone" :style="{ 'background-image': 'url(' + require('@/assets/Scene/2.gif') + ')' }">
+        
         <div class="row char-zone">
           <Player class="chara col" />
           <EnermyChar class="chara col"/>
         </div>
+        <!--Effect value-->
         <div class="row effect-value-zone ">
-          <p class="point col animate__bounceIn effect-value" v-show="effectValue != 0">{{effectValue}}</p>
-          <p class="point col animate__bounceIn effect-value">abc</p>
+          <p :class="['col' ,'animate__bounceIn','effect-value', getColorEffectValue(effectValueToPlayer.type)]" v-show="effectValueToPlayer.val != 0">{{effectValueToPlayer.val}}</p>
+          <p class="col" v-show="effectValueToPlayer.val == 0">&nbsp;</p>
+          <p :class="['col' ,'animate__bounceIn','effect-value',getColorEffectValue(effectValueToEnermy.type)]" v-show="effectValueToEnermy.val != 0">{{effectValueToEnermy.val}}</p>
+          <p class="col" v-show="effectValueToEnermy.val == 0">&nbsp;</p>
         </div>
       </div>
       <!-- Card deck -->
@@ -57,6 +65,10 @@ export default {
           {
             type: 'atk',
             val: 10
+          },
+          {
+            type: 'atk',
+            val: 5
           }
         ]
       },
@@ -136,7 +148,14 @@ export default {
     const enermyHPChangeAction = []
     const enermyAtkList = []
 
-    const effectValue = 0
+    const effectValueToPlayer = {
+      type: null,
+      val: 0
+    }
+    const effectValueToEnermy = {
+      type: null,
+      val: 0
+    }
 
     return {
       gameData,
@@ -147,7 +166,8 @@ export default {
       gameTurn,
       cardDeckList,
       cardDeckAmount,
-      effectValue
+      effectValueToPlayer,
+      effectValueToEnermy
     }
   },
   watch: {
@@ -180,31 +200,44 @@ export default {
       this.playerHPChangeAction = playerHPChangeAction
     },
     enermyAction (enermyAction) {
-      this.resetGameTurn()
-      enermyAction.forEach(element => {
-        switch (element.type) {
-          case 'atk':
-            this.playerHPChangeAction.push(element)
-            break
-          case 'heal':
-            this.enermyHPChangeAction.push(element)
-        }
+      return new Promise((resolve, reject) => {
+        const enermyHPChangeAction = []
+        const playerHPChangeAction = []
+        enermyAction.forEach(element => {
+          switch (element.type) {
+            case 'atk':
+              playerHPChangeAction.push(element)
+              break
+            case 'heal':
+              enermyHPChangeAction.push(element)
+              break
+          }
+        })
+        this.enermyHPChangeAction = enermyHPChangeAction
+        this.playerHPChangeAction = playerHPChangeAction
+        resolve()
       })
     },
     resetGameTurn () {
-      this.playerHPChangeAction = []
-      this.enermyHPChangeAction = []
+      return new Promise((resolve, reject) => {
+        this.playerHPChangeAction = []
+        this.enermyHPChangeAction = []
+        resolve()
+      })
     },
-    finishedAction () {
+    async finishedAction () {
       this.gameTurn++
       // 4 and 2 bcause two HP component return finish
       if (this.gameTurn === 4) {
         this.gameTurn = 0
-        alert('your turn')
-        this.takeCardToDeck()
+        
+        // alert('your turn')
+        await this.showMoDalChangeTurn()
+        await this.clearCardDeck()
+        await this.takeCardToDeck()
       } 
       if (this.gameTurn === 2) {
-        alert('enermy turn')
+        await this.showMoDalChangeTurn()
         this.enermyAction(this.gameData.enermyData.skill)
       }
     },
@@ -212,24 +245,66 @@ export default {
       this.playerAction(actionCombo)
     },
     takeCardToDeck () {
-      Promise.resolve(this.resetCardDeck()).then(() => {
+      return new Promise((resolve, reject) => {
         for (let i = 1; i <= this.cardDeckAmount; i++) {
           const randomIndex = Math.floor(Math.random() * this.gameData.cardList.length)
           this.cardDeckList.push(this.gameData.cardList[randomIndex])
         }
+        resolve()
       })
     },
-    resetCardDeck () {
-      this.cardDeckList = []
+    clearCardDeck () {
+      return new Promise((resolve, reject) => {
+        this.cardDeckList = []
+        resolve()
+      })
     },
-    getEffectValueHP (value) {
-      Promise.resolve(
-        this.effectValue = value
-      ).then(
+    showEffectHPPlayer (skill) {
+      return new Promise((resolve, reject) => {
+        this.effectValueToPlayer.type = skill.type
+        this.effectValueToPlayer.val = skill.val
+        resolve()
+      }).then(
         setTimeout(() => {
-          this.effectValue = 0
+          this.effectValueToPlayer.val = 0
+        }, 470)
+      )   
+    },
+    showEffectHPEnermy (skill) {
+      return new Promise((resolve, reject) => {
+        this.effectValueToEnermy.type = skill.type
+        this.effectValueToEnermy.val = skill.val
+        resolve()
+      }).then(
+        setTimeout(() => {
+          this.effectValueToEnermy.val = 0
+        }, 470)
+      )   
+    },
+    getColorEffectValue (skillType) {
+      switch (skillType) {
+        case 'atk':
+          return 'dmgVal'
+        case 'heal':
+          return 'healVal'
+      }
+    },
+    showMoDalChangeTurn () {
+      return new Promise((resolve, reject) => {
+        this.$refs['modal-1'].show()
+        setTimeout(() => {
+          this.$refs['modal-1'].hide()
+          resolve()
+        }, 800)
+      })
+    },
+    closeMoDalChangeTurn () {
+      return new Promise((resolve, reject) => {
+        this.$refs['modal-1'].hide()
+        setTimeout(() => {
+          resolve()
         }, 500)
-      )
+      })
     }
   }
 }
@@ -277,5 +352,13 @@ export default {
 .effect-value{
   font-size: 3em;
   color: rgb(251, 255, 14);
+}
+.dmgVal{
+  color: red;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+.healVal{
+  color: rgb(9, 241, 1);
+  text-shadow: -1px 0 rgb(185, 255, 153), 0 1px rgb(185, 255, 153), 1px 0 rgb(185, 255, 153), 0 -1px rgb(185, 255, 153);
 }
 </style>
