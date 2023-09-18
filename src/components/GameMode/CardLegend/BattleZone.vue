@@ -5,21 +5,32 @@
           <HpBar class="player-hp col "
                   :hpChangeActionProp="playerHPChangeAction"
                   :dataProp="gameData.playerData"
+                  :buffDebuffProp="playerBuffDebuff"
                   @finishedTurn="finishedAction()"
                   @effectValue="showEffectHPPlayer"/>
-          <div class="col "></div>
+          <div class="col"></div>
           <HpBar class="enermy-hp col"
                 :hpChangeActionProp="enermyHPChangeAction"
                 :dataProp="gameData.enermyData" 
+                :buffDebuffProp="enermyBuffDebuff"
                 @finishedTurn="finishedAction()"
                 @effectValue="showEffectHPEnermy"/>
+        </div>
+        <div class="row">
+          <div class="col">
+            <BuffEffectShower :playerTypeProp="'player'"
+                              :buff_debuffEffectProp="playerBuffDebuff"/>
+          </div>
+          <div class="col"></div>
+          <div class="col">
+            <BuffEffectShower :playerTypeProp="'enermy'"/>
+          </div>
         </div>
       </div>
       <b-modal ref="modal-1" title="BootstrapVue">
         <p class="my-4">Hello from modal!</p>
       </b-modal>
       <div class="battle-zone" :style="{ 'background-image': 'url(' + require('@/assets/Scene/2.gif') + ')' }">
-        
         <div class="row char-zone">
           <Player class="chara col" />
           <EnermyChar class="chara col"/>
@@ -32,6 +43,7 @@
           <p class="col" v-show="effectValueToEnermy.val == 0">&nbsp;</p>
         </div>
       </div>
+      <BlessingCardShow/>
       <!-- Card deck -->
       <CardDeck @actionCombo="sendActionCombo"
                 :cardDeckProp="cardDeckList"
@@ -42,8 +54,10 @@
 <script>
 import Player from '@/components/GameObject/Player.vue'
 import EnermyChar from '@/components/GameObject/EnermyChar.vue'
-import HpBar from '@/components/UI/MainGame/HpBar.vue'
-import CardDeck from '@/components/UI/MainGame/CardDeck.vue'
+import HpBar from '@/components/GameObject/HpBar.vue'
+import CardDeck from '@/components/GameObject/Card/CardDeck.vue'
+import BuffEffectShower from '@/components/GameObject/Buff-Debuff/BuffShower.vue'
+import BlessingCardShow from '@/components/GameObject/Card/BlessingCardShow.vue'
 
 export default {
   name: 'MainPlayer',
@@ -52,7 +66,9 @@ export default {
     Player,
     EnermyChar,
     HpBar,
-    CardDeck
+    CardDeck,
+    BuffEffectShower,
+    BlessingCardShow
   },
   data () {
     const gameData = {
@@ -76,23 +92,34 @@ export default {
         {
           id: 1,
           name: 'normalAtk.jpg',
+          cardImg: 'normalAtk.jpg',
           rank: 'b',
           description: 'Cause',
           effect: [
             {
-              type: 'atk',
-              val: 5
+              type: 'atkup',
+              effectImg: 'atkup.png',
+              val: 50,
+              duration: 2
+            },
+            {
+              type: 'maxhpup',
+              effectImg: 'atkup.png',
+              val: 50,
+              duration: 3
             }
           ]
         },
         {
           id: 2,
           name: 'normalHeal.jpg',
+          cardImg: 'normalHeal.jpg',
           rank: 'a',
           description: 'Cause',
           effect: [
             {
               type: 'heal',
+              effectImg: 'heal.png',
               val: 7
             }
           ]
@@ -100,53 +127,62 @@ export default {
         {
           id: 3,
           name: 'midAtk.jpg',
+          cardImg: 'midAtk.jpg',
           rank: 's',
           description: 'Cause',
           effect: [
             {
               type: 'atk',
+              effectImg: 'atk.png',
               val: 7
             }
           ]
-        },
-        {
-          id: 4,
-          name: 'strongAtk.jpg',
-          rank: 'ss',
-          description: '<p>Cause </p>',
-          effect: [
-            {
-              type: 'atk',
-              val: 5
-            },
-            {
-              type: 'heal',
-              val: 10
-            }
-          ]
-        },
-        {
-          id: 5,
-          name: '+1.jpg',
-          rank: 'sss',
-          description: '<p>abc<\/p>',
-          effect: [
-            {
-              type: 'card+',
-              val: 1
-            }
-          ]
         }
+        // {
+        //   id: 4,
+        //   name: 'strongAtk.jpg',
+        //   cardImg: 'strongAtk.jpg',
+        //   rank: 'ss',
+        //   description: '<p>Cause </p>',
+        //   effect: [
+        //     {
+        //       type: 'atk',
+        //       effectImg: 'atk.png',
+        //       val: 5
+        //     },
+        //     {
+        //       type: 'heal',
+        //       effectImg: 'heal.png',
+        //       val: 10
+        //     }
+        //   ]
+        // },
+        // {
+        //   id: 5,
+        //   name: '+1.jpg',
+        //   cardImg: '+1.jpg',
+        //   rank: 'sss',
+        //   description: '<p>abc<\/p>',
+        //   effect: [
+        //     {
+        //       type: 'card+',
+        //       effectImg: 'card+.png',
+        //       val: 1
+        //     }
+        //   ]
+        // }
       ]
     }
+    const test = 1
     const cardDeckList = []
     const cardDeckAmount = 4
     const gameTurn = 0
 
     const playerHPChangeAction = []
-    const playerBuff = []
+    const playerBuffDebuff = []
     const enermyHPChangeAction = []
     const enermyAtkList = []
+    const enermyBuffDebuff = []
 
     const effectValueToPlayer = {
       type: null,
@@ -158,11 +194,13 @@ export default {
     }
 
     return {
+      test,
       gameData,
       playerHPChangeAction,
       enermyHPChangeAction,
-      playerBuff,
+      playerBuffDebuff,
       enermyAtkList,
+      enermyBuffDebuff,
       gameTurn,
       cardDeckList,
       cardDeckAmount,
@@ -185,6 +223,9 @@ export default {
           switch (effect.type) {
             case 'atk':
               enermyHPChangeAction.push(effect)
+              break
+            case 'atkup':
+              this.enermyBuffDebuff.push(effect)
               break
             case 'heal':
               playerHPChangeAction.push(effect)
@@ -227,17 +268,16 @@ export default {
     },
     async finishedAction () {
       this.gameTurn++
-      // 4 and 2 bcause two HP component return finish
+      // 4 and 2 bcause two HP component return finished
       if (this.gameTurn === 4) {
         this.gameTurn = 0
-        
-        // alert('your turn')
-        await this.showMoDalChangeTurn()
+        await this.showModalChangeTurn()
         await this.clearCardDeck()
         await this.takeCardToDeck()
       } 
       if (this.gameTurn === 2) {
-        await this.showMoDalChangeTurn()
+        await this.DecreaseBuffDebuffDuration()
+        await this.showModalChangeTurn()
         this.enermyAction(this.gameData.enermyData.skill)
       }
     },
@@ -248,7 +288,8 @@ export default {
       return new Promise((resolve, reject) => {
         for (let i = 1; i <= this.cardDeckAmount; i++) {
           const randomIndex = Math.floor(Math.random() * this.gameData.cardList.length)
-          this.cardDeckList.push(this.gameData.cardList[randomIndex])
+          const card = JSON.parse(JSON.stringify(this.gameData.cardList[randomIndex]))
+          this.cardDeckList.push(card)
         }
         resolve()
       })
@@ -259,10 +300,10 @@ export default {
         resolve()
       })
     },
-    showEffectHPPlayer (skill) {
+    showEffectHPPlayer (effect) {
       return new Promise((resolve, reject) => {
-        this.effectValueToPlayer.type = skill.type
-        this.effectValueToPlayer.val = skill.val
+        this.effectValueToPlayer.type = effect.type
+        this.effectValueToPlayer.val = effect.val
         resolve()
       }).then(
         setTimeout(() => {
@@ -289,7 +330,7 @@ export default {
           return 'healVal'
       }
     },
-    showMoDalChangeTurn () {
+    showModalChangeTurn () {
       return new Promise((resolve, reject) => {
         this.$refs['modal-1'].show()
         setTimeout(() => {
@@ -304,6 +345,30 @@ export default {
         setTimeout(() => {
           resolve()
         }, 500)
+      })
+    },
+    DecreaseBuffDebuffDuration (decreaseValue) {
+      return new Promise((resolve, reject) => {
+        console.log(this.playerBuffDebuff)
+        let index = 0
+        while (index !== this.playerBuffDebuff.length) {
+          this.playerBuffDebuff[index].duration--
+          if (this.playerBuffDebuff[index].duration === 0) {
+            this.RemoveBuffDebuff(this.playerBuffDebuff[index])
+          } else {
+            index++
+          }
+        }
+        resolve()
+      })
+    },
+    RemoveBuffDebuff (buffDebuff) {
+      return new Promise((resolve, reject) => {
+        const buffDebuffIndex = this.playerBuffDebuff.indexOf(buffDebuff)
+        if (buffDebuffIndex > -1) {
+          this.playerBuffDebuff.splice(buffDebuffIndex, 1)
+        }
+        resolve()
       })
     }
   }

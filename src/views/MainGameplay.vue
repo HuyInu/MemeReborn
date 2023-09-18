@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import BattleZone from '@/components/UI/MainGame/BattleZone.vue'
+import BattleZone from '@/components/GameMode/CardLegend/BattleZone.vue'
 
 export default {
   name: 'MainGameplay',

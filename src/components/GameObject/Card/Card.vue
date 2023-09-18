@@ -3,14 +3,14 @@
     <span v-html="cardProp.description"></span>
     <RankText class="cardRankText" :rankProps="cardProp.rank"/>
     <div :class="['card-frame',isClicked ? 'card-clicked' : '']">
-        <img  :class="['card-pic',getCardBorderColor(cardProp.rank)]" 
-            :src="require('@/assets/CardImg/'+cardProp.name)"
+        <img :class="['card-pic',getCardBorderColor(cardProp.rank)]" 
+            :src="require('@/assets/CardImg/'+cardProp.cardImg)"
             :id="cardProp.id"
             @click="cardClick"
             />       
     </div>
     <div class="de-buff">
-      <img v-for="(cardEffect, index) in cardProp.effect" :key="index" width="30px" :src="require('@/assets/De-Buff/'+cardEffect.type+'.png')">
+      <img v-for="(cardEffect, index) in cardProp.effect" :key="index" width="30px" :src="require('@/assets/De-Buff/'+cardEffect.effectImg)">
     </div>
   </div>
 </template>
@@ -94,7 +94,7 @@ export default {
 .cardRankText{
   position: absolute;
   z-index: 1;
-  font-size: 2vw;
+  font-size: 1.3rem;
 }
 .rank-b{
   border-style: solid ;

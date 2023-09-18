@@ -33,13 +33,12 @@
                 />
       </div>
     </div>
-    
 </template>
 
 <script>
-import Card from '@/components/GameObject/Card.vue'
-import CardCounter from '@/components/UI/MainGame/ItemCounter.vue'
-import Button from '@/components/UI/Button/Button.vue'
+import Card from '@/components/GameObject/Card/Card.vue'
+import CardCounter from '@/components/GameObject/Card/ItemCounter.vue'
+import Button from '@/components/GameObject/Button/Button.vue'
 
 export default {
   name: 'CardDeck',

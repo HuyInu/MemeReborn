@@ -1,0 +1,10 @@
+row
+col col-lg-12 col-lg-10
+float-start
+float-end
+d-inline-block
+justify-content-center
+h-100
+img-fluid
+col-md
+container
