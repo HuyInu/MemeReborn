@@ -8,3 +8,6 @@ h-100
 img-fluid
 col-md
 container
+
+.modal-lg
+modal-dialog-centered

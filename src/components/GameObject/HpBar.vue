@@ -16,24 +16,39 @@ export default {
   name: 'HpBar',
   props: ['hpChangeActionProp',
     'dataProp',
-    'buffDebuffProp'],
+    'buffDebuffProp',
+    'isMyTurnProp',
+    'who'],
   data (props) {
     const maxHP = props.dataProp.hp ? props.dataProp.hp : 'loading'
     const currentHP = props.dataProp.hp ? props.dataProp.hp : 'loading'
     const currentHPPercent = 100
 
+    const moreGainDmg = 0
+    const moreGainHeal = 0
+    const actionBuffDebuff = []
     return {
       maxHP,
       currentHPPercent,
-      currentHP
+      currentHP,
+      moreGainDmg,
+      moreGainHeal,
+      actionBuffDebuff
     }
   },
   watch: {
-    hpChangeActionProp () {
-      if (this.hpChangeActionProp.length === 0) {
-        this.endTurn()
-        return 0
-      }
+    'buffDebuffProp.statusBuffDebuff' () {
+      console.log(this.buffDebuffProp)
+      this.moreGainDmg = 0
+      this.buffDebuffProp.statusBuffDebuff.forEach((buffDebuff, index) => {
+        switch (buffDebuff.type) {
+          case 'atkup':
+            this.moreGainDmg += buffDebuff.val
+            break
+        }
+      })
+    },
+    isMyTurnProp () {
       this.startTurn()
     },
     currentHP () {
@@ -49,33 +64,67 @@ export default {
     },
     changeHPAction () {
       return new Promise((resolve, reject) => {
-        this.fetchActionArray()
-        setTimeout(async () => {
-          await resolve()
-        }, 500 * (this.hpChangeActionProp.length + 1))
+        this.fetchAction()
+        setTimeout(() => {
+          resolve()
+        }, 500 * (this.hpChangeActionProp.length + 1 + this.buffDebuffProp.actionBuffDebuff.length + 1))
       })
+    },
+    async fetchAction () {
+      await this.fetchActionArray()
+      if (this.isMyTurnProp) {
+        await this.fetchActionBuffDebuffArray()
+      }
     },
     fetchActionArray () {
       let actionLenght = 0
-      let dmgAfterBuffDebuff = 0
+      let newEffectVal = 0
       return new Promise((resolve, reject) => {
+        if (this.hpChangeActionProp.length === 0) {
+          resolve()
+        }
         this.hpChangeActionProp.forEach((effect, index) => {
           setTimeout(async () => {
             switch (effect.type) {
-              case 'atk': {
-                dmgAfterBuffDebuff = await this.calcDmgByBuffDebuff(effect.val)
-                await this.reduceHP(dmgAfterBuffDebuff)
+              case 'atk':
+                newEffectVal = effect.val + this.moreGainDmg
+                await this.reduceHP(newEffectVal)
                 break         
-              }
               case 'heal':
-                this.recoverHP(effect.val)
+                newEffectVal = effect.val
+                this.recoverHP(newEffectVal)
                 break
             }
             await this.calcCurrentHPPercent()
-            await this.sendEffectValue(effect.type, dmgAfterBuffDebuff)
-            actionLenght++
-            if (actionLenght === this.hpChangeActionProp.length - 1 | actionLenght !== 0) {
+            await this.sendEffectValue(effect.type, newEffectVal)
+            if (actionLenght === this.hpChangeActionProp.length - 1) {
               resolve()
+            } else {
+              actionLenght++
+            }
+          }, 500 * (index + 1))
+        })
+      })
+    },
+    fetchActionBuffDebuffArray () {
+      let actionLenght = 0
+      return new Promise((resolve, reject) => {
+        if (this.buffDebuffProp.actionBuffDebuff.length === 0) {
+          resolve()
+        }
+        this.buffDebuffProp.actionBuffDebuff.forEach((buffDebuff, index) => {
+          setTimeout(async () => {
+            switch (buffDebuff.type) {
+              case 'bleed':
+                await this.reduceHP(buffDebuff.val)
+                break
+            }
+            await this.calcCurrentHPPercent()
+            await this.sendEffectValue(buffDebuff.type, buffDebuff.val)
+            if (actionLenght === this.buffDebuffProp.actionBuffDebuff.length - 1) {
+              resolve()
+            } else {
+              actionLenght++
             }
           }, 500 * (index + 1))
         })
@@ -116,20 +165,6 @@ export default {
         }
         this.$emit('effectValue', effect)
         resolve()
-      })
-    },
-    calcDmgByBuffDebuff (dmg) {
-      return new Promise((resolve, reject) => {
-        let dmgAfterBuffDebuff = dmg
-        this.buffDebuffProp.forEach((buffDebuff, index) => {
-          console.log(buffDebuff)
-          switch (buffDebuff.type) {
-            case 'atkup':
-              dmgAfterBuffDebuff += buffDebuff.val
-              break
-          }
-        })
-        resolve(dmgAfterBuffDebuff)
       })
     }
   }

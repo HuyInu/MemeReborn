@@ -5,7 +5,6 @@
     <div :class="['card-frame',isClicked ? 'card-clicked' : '']">
         <img :class="['card-pic',getCardBorderColor(cardProp.rank)]" 
             :src="require('@/assets/CardImg/'+cardProp.cardImg)"
-            :id="cardProp.id"
             @click="cardClick"
             />       
     </div>
@@ -94,7 +93,7 @@ export default {
 .cardRankText{
   position: absolute;
   z-index: 1;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
 }
 .rank-b{
   border-style: solid ;

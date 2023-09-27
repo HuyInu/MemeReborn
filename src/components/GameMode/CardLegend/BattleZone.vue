@@ -3,18 +3,24 @@
       <div class="header ">
         <div class="row">
           <HpBar class="player-hp col "
-                  :hpChangeActionProp="playerHPChangeAction"
-                  :dataProp="gameData.playerData"
-                  :buffDebuffProp="playerBuffDebuff"
-                  @finishedTurn="finishedAction()"
-                  @effectValue="showEffectHPPlayer"/>
+            :hpChangeActionProp="playerHPChangeAction"
+            :dataProp="gameData.playerData"
+            :buffDebuffProp="playerHPChangeBuffDebuff"
+            :isMyTurnProp="playerTurn"
+            :who="'player'"
+            @finishedTurn="finishedAction()"
+            @effectValue="showEffectHPPlayer"
+          />
           <div class="col"></div>
           <HpBar class="enermy-hp col"
-                :hpChangeActionProp="enermyHPChangeAction"
-                :dataProp="gameData.enermyData" 
-                :buffDebuffProp="enermyBuffDebuff"
-                @finishedTurn="finishedAction()"
-                @effectValue="showEffectHPEnermy"/>
+            :hpChangeActionProp="enermyHPChangeAction"
+            :dataProp="gameData.enermyData" 
+            :buffDebuffProp="enermyHPChangeBuffDebuff"
+            :isMyTurnProp="enermyTurn"
+            :who="'enermy'"
+            @finishedTurn="finishedAction()"
+            @effectValue="showEffectHPEnermy"
+          />
         </div>
         <div class="row">
           <div class="col">
@@ -23,7 +29,8 @@
           </div>
           <div class="col"></div>
           <div class="col">
-            <BuffEffectShower :playerTypeProp="'enermy'"/>
+            <BuffEffectShower :playerTypeProp="'enermy'"
+                              :buff_debuffEffectProp="enermyBuffDebuff"/>
           </div>
         </div>
       </div>
@@ -85,6 +92,12 @@ export default {
           {
             type: 'atk',
             val: 5
+          },
+          {
+            type: 'atkup',
+            effectImg: 'atkup.png',
+            val: 50,
+            duration: 2
           }
         ]
       },
@@ -94,7 +107,7 @@ export default {
           name: 'normalAtk.jpg',
           cardImg: 'normalAtk.jpg',
           rank: 'b',
-          description: 'Cause',
+          description: 'Atkup',
           effect: [
             {
               type: 'atkup',
@@ -103,7 +116,7 @@ export default {
               duration: 2
             },
             {
-              type: 'maxhpup',
+              type: 'bleed',
               effectImg: 'atkup.png',
               val: 50,
               duration: 3
@@ -173,17 +186,25 @@ export default {
         // }
       ]
     }
-    const test = 1
     const cardDeckList = []
     const cardDeckAmount = 4
     const gameTurn = 0
+    const playerTurn = !true
+    const enermyTurn = !false
 
     const playerHPChangeAction = []
     const playerBuffDebuff = []
+    const playerHPChangeBuffDebuff = {
+      actionBuffDebuff: [],
+      statusBuffDebuff: []
+    }
     const enermyHPChangeAction = []
     const enermyAtkList = []
     const enermyBuffDebuff = []
-
+    const enermyHPChangeBuffDebuff = {
+      actionBuffDebuff: [],
+      statusBuffDebuff: []
+    }
     const effectValueToPlayer = {
       type: null,
       val: 0
@@ -194,14 +215,17 @@ export default {
     }
 
     return {
-      test,
       gameData,
       playerHPChangeAction,
       enermyHPChangeAction,
       playerBuffDebuff,
+      playerHPChangeBuffDebuff,
       enermyAtkList,
       enermyBuffDebuff,
+      enermyHPChangeBuffDebuff,
       gameTurn,
+      playerTurn,
+      enermyTurn,
       cardDeckList,
       cardDeckAmount,
       effectValueToPlayer,
@@ -225,6 +249,11 @@ export default {
               enermyHPChangeAction.push(effect)
               break
             case 'atkup':
+              this.enermyHPChangeBuffDebuff.statusBuffDebuff.push(effect)
+              this.playerBuffDebuff.push(effect)
+              break
+            case 'bleed':
+              this.enermyHPChangeBuffDebuff.actionBuffDebuff.push(effect)
               this.enermyBuffDebuff.push(effect)
               break
             case 'heal':
@@ -239,23 +268,33 @@ export default {
       })
       this.enermyHPChangeAction = enermyHPChangeAction
       this.playerHPChangeAction = playerHPChangeAction
+      this.playerTurn = !this.playerTurn
+      this.enermyTurn = !this.enermyTurn
     },
     enermyAction (enermyAction) {
       return new Promise((resolve, reject) => {
         const enermyHPChangeAction = []
         const playerHPChangeAction = []
-        enermyAction.forEach(element => {
-          switch (element.type) {
+        enermyAction = JSON.parse(JSON.stringify(enermyAction))
+        enermyAction.forEach(effect => {
+          switch (effect.type) {
             case 'atk':
-              playerHPChangeAction.push(element)
+              playerHPChangeAction.push(effect)
               break
             case 'heal':
-              enermyHPChangeAction.push(element)
+              enermyHPChangeAction.push(effect)
+              break
+            case 'atkup':
+              this.enermyBuffDebuff.push(effect)
+              this.playerHPChangeBuffDebuff.statusBuffDebuff.push(effect)
+              console.log(this.playerHPChangeBuffDebuff)
               break
           }
         })
         this.enermyHPChangeAction = enermyHPChangeAction
         this.playerHPChangeAction = playerHPChangeAction
+        this.playerTurn = !this.playerTurn
+        this.enermyTurn = !this.enermyTurn
         resolve()
       })
     },
@@ -270,13 +309,16 @@ export default {
       this.gameTurn++
       // 4 and 2 bcause two HP component return finished
       if (this.gameTurn === 4) {
+        // End Enermy turn
         this.gameTurn = 0
+        await this.ReduceBuffDebuffDuration(this.enermyBuffDebuff, this.playerHPChangeBuffDebuff.statusBuffDebuff, this.enermyHPChangeBuffDebuff.actionBuffDebuff)
         await this.showModalChangeTurn()
         await this.clearCardDeck()
         await this.takeCardToDeck()
       } 
       if (this.gameTurn === 2) {
-        await this.DecreaseBuffDebuffDuration()
+        // End Player turn
+        await this.ReduceBuffDebuffDuration(this.playerBuffDebuff, this.enermyHPChangeBuffDebuff.statusBuffDebuff, this.playerHPChangeBuffDebuff.actionBuffDebuff)
         await this.showModalChangeTurn()
         this.enermyAction(this.gameData.enermyData.skill)
       }
@@ -347,26 +389,51 @@ export default {
         }, 500)
       })
     },
-    DecreaseBuffDebuffDuration (decreaseValue) {
+    ReduceBuffDebuffDuration (buffDebuffShow, statusBuffDebuff, actionBuffDebuff) {
       return new Promise((resolve, reject) => {
-        console.log(this.playerBuffDebuff)
-        let index = 0
-        while (index !== this.playerBuffDebuff.length) {
-          this.playerBuffDebuff[index].duration--
-          if (this.playerBuffDebuff[index].duration === 0) {
-            this.RemoveBuffDebuff(this.playerBuffDebuff[index])
-          } else {
-            index++
+        let result = null
+        let statusIndex = 0
+        let actionIndex = 0
+        let loopLength = this.GetLongerLengthArray(statusBuffDebuff, actionBuffDebuff)
+        while (statusIndex !== loopLength && actionIndex !== loopLength) {
+          if (statusIndex !== statusBuffDebuff.length) {
+            result = this.CheckAndReduceBuffDebuffDuration(buffDebuffShow, statusBuffDebuff, statusIndex)
+            if (result === 'notEndedBuffDebuff') {  
+              statusIndex++
+            }
           }
+          if (actionIndex !== actionBuffDebuff.length) {
+            result = this.CheckAndReduceBuffDebuffDuration(buffDebuffShow, actionBuffDebuff, actionIndex)
+            if (result === 'notEndedBuffDebuff') {  
+              actionIndex++
+            }
+          }
+          loopLength = this.GetLongerLengthArray(statusBuffDebuff, actionBuffDebuff)
         }
         resolve()
       })
     },
-    RemoveBuffDebuff (buffDebuff) {
+    CheckAndReduceBuffDebuffDuration (buffDebuffShow, buffDebuffHPChange, buffDebuffIndex) {
+      buffDebuffHPChange[buffDebuffIndex].duration--
+      if (buffDebuffHPChange[buffDebuffIndex].duration === 0) {
+        this.RemoveItemArray(buffDebuffShow, buffDebuffHPChange[buffDebuffIndex])
+        this.RemoveItemArray(buffDebuffHPChange, buffDebuffHPChange[buffDebuffIndex])
+        return 'EndedBuffDebuff'
+      }
+      return 'notEndedBuffDebuff'
+    },
+    GetLongerLengthArray (array1, array2) {
+      if (array1.length >= array2.length) {
+        return array1.length
+      } else {
+        return array2.length
+      }
+    },
+    RemoveItemArray (array, item) {
       return new Promise((resolve, reject) => {
-        const buffDebuffIndex = this.playerBuffDebuff.indexOf(buffDebuff)
-        if (buffDebuffIndex > -1) {
-          this.playerBuffDebuff.splice(buffDebuffIndex, 1)
+        const itemIndex = array.indexOf(item)
+        if (itemIndex > -1) {
+          array.splice(itemIndex, 1)
         }
         resolve()
       })
