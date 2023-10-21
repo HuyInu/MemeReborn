@@ -50,7 +50,13 @@
           <p class="col" v-show="effectValueToEnermy.val == 0">&nbsp;</p>
         </div>
       </div>
-      <BlessingCardShow/>
+          <!-- Button trigger modal -->
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" @click="takeCardToDeck(3, gameData.blessingCardList, blessingCardList)">
+        Launch demo modal
+      </button>
+      <BlessingCardShow
+        :blessingCardProp="blessingCardList"
+      />
       <!-- Card deck -->
       <CardDeck @actionCombo="sendActionCombo"
                 :cardDeckProp="cardDeckList"
@@ -184,6 +190,44 @@ export default {
         //     }
         //   ]
         // }
+      ],
+      blessingCardList: [
+        {
+          id: 1,
+          name: 'normalAtk.jpg',
+          cardImg: 'iqgod.jpg',
+          rank: 'b',
+          description: 'Atkup',
+          effect: [
+            {
+              type: 'atkup',
+              effectImg: 'atkup.png',
+              val: 50,
+              duration: 2
+            },
+            {
+              type: 'bleed',
+              effectImg: 'atkup.png',
+              val: 50,
+              duration: 3
+            }
+          ]
+        },
+        {
+          id: 1,
+          name: 'normalAtk.jpg',
+          cardImg: 'utragod.jpg',
+          rank: 'sss',
+          description: 'Atkup',
+          effect: [
+            {
+              type: 'atkup',
+              effectImg: 'atkup.png',
+              val: 50,
+              duration: 2
+            }
+          ]
+        }
       ]
     }
     const cardDeckList = []
@@ -198,6 +242,7 @@ export default {
       actionBuffDebuff: [],
       statusBuffDebuff: []
     }
+    const blessingCardList = []
     const enermyHPChangeAction = []
     const enermyAtkList = []
     const enermyBuffDebuff = []
@@ -220,6 +265,7 @@ export default {
       enermyHPChangeAction,
       playerBuffDebuff,
       playerHPChangeBuffDebuff,
+      blessingCardList,
       enermyAtkList,
       enermyBuffDebuff,
       enermyHPChangeBuffDebuff,
@@ -235,7 +281,7 @@ export default {
   watch: {
   },
   created () {
-    this.takeCardToDeck()
+    this.takeCardToDeck(this.cardDeckAmount, this.gameData.cardList, this.cardDeckList)
   },
   methods: {
     playerAction (actionCombo) {
@@ -314,7 +360,7 @@ export default {
         await this.ReduceBuffDebuffDuration(this.enermyBuffDebuff, this.playerHPChangeBuffDebuff.statusBuffDebuff, this.enermyHPChangeBuffDebuff.actionBuffDebuff)
         await this.showModalChangeTurn()
         await this.clearCardDeck()
-        await this.takeCardToDeck()
+        await this.takeCardToDeck(this.cardDeckAmount, this.gameData.cardList, this.cardDeckList)
       } 
       if (this.gameTurn === 2) {
         // End Player turn
@@ -326,12 +372,12 @@ export default {
     sendActionCombo (actionCombo) {
       this.playerAction(actionCombo)
     },
-    takeCardToDeck () {
+    takeCardToDeck (amountToTake, cardPocket, cardDeskArray) {
       return new Promise((resolve, reject) => {
-        for (let i = 1; i <= this.cardDeckAmount; i++) {
-          const randomIndex = Math.floor(Math.random() * this.gameData.cardList.length)
-          const card = JSON.parse(JSON.stringify(this.gameData.cardList[randomIndex]))
-          this.cardDeckList.push(card)
+        for (let i = 1; i <= amountToTake; i++) {
+          const randomIndex = Math.floor(Math.random() * cardPocket.length)
+          const card = JSON.parse(JSON.stringify(cardPocket[randomIndex]))
+          cardDeskArray.push(card)
         }
         resolve()
       })

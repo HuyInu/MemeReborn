@@ -1,47 +1,49 @@
-
-import Vue from 'vue';
 <template>
   <div>
-    <!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-  Launch demo modal
-</button>
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-        <Card :cardProp="demoCard"/>
-        <Card :cardProp="demoCard"/>
-        <Card :cardProp="demoCard"/>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+              <Card class="card-object"
+                v-for="(card,index) in blessingCardProp" 
+                :key="index" 
+                :cardProp="card"
+                :idInDeckProp="index"
+                :isRadioBtnProp="true"
+                @CardInfo="GetCardInfo"
+                :elementName="'card-radio'"
+              />
+            </div>
+            <div class="modal-footer">
+              <Button class="btn-menu"
+                        :btnTextProp="'PRAY'"
+                        :btnBGProp="'yellow-pixel_button.png'"
+                      />
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
   </div>
 </template>
 
 <script>
 import Card from '@/components/GameObject/Card/Card.vue'
+import Button from '@/components/GameObject/Button/Button.vue'
 
 export default {
-  components: { Card },
+  components: { 
+    Card,
+    Button 
+  },
+  props: [
+    'blessingCardProp'
+  ],
   data () {
-    const demoCard = {
-      id: 2,
-      name: 'normalHeal.jpg',
-      cardImg: 'normalHeal.jpg',
-      rank: 'a',
-      description: 'Cause',
-      effect: [
-        {
-          type: 'heal',
-          effectImg: 'heal.png',
-          val: 7
-        }
-      ]
-    }
-    return {
-      demoCard
+    return {}
+  },
+  methods: {
+    GetCardInfo (card) {
+      console.log(card)
     }
   }
 }
@@ -49,8 +51,17 @@ export default {
 
 <style scoped>
 .modal-content {
-  flex-direction: unset;
   border: none;
   background-color: unset;
+}
+.modal-body {
+  display: flex;
+}
+.modal-footer {
+  border: none;
+  justify-content: center
+}
+.card-object {
+  width: 100%;
 }
 </style>

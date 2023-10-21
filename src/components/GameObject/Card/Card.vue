@@ -2,7 +2,7 @@
   <div>
     <span v-html="cardProp.description"></span>
     <RankText class="cardRankText" :rankProps="cardProp.rank"/>
-    <div :class="['card-frame',isClicked ? 'card-clicked' : '']">
+    <div :class="['card-frame',isClicked ? 'card-clicked' : '']" ref="thisCard" :name="elementName">
         <img :class="['card-pic',getCardBorderColor(cardProp.rank)]" 
             :src="require('@/assets/CardImg/'+cardProp.cardImg)"
             @click="cardClick"
@@ -19,11 +19,16 @@ import RankText from '@/components/GameObject/RankText.vue'
 
 export default {
   name: 'CardTemplate',
-  props: ['cardProp', 'idInDeckProp'],
+  props: [
+    'cardProp',
+    'idInDeckProp',
+    'isRadioBtnProp',
+    'elementName'
+  ],
   components: { RankText },
   data (props) {
     const isClicked = false
-
+    const isRadioBtn = props.isRadioBtnProp ? props.isRadioBtnProp : false
     const cardInfo = {
       id: props.idInDeckProp,
       type: props.cardProp.type,
@@ -32,31 +37,39 @@ export default {
     }
     return {
       isClicked,
-      cardInfo
+      cardInfo,
+      isRadioBtn
     }
   },
   methods: {
     getCardBorderColor (cardRank) {
       return 'rank-' + cardRank
     },
-    cardHover () {
-      
-    },
-    cardClick () {
-      this.cardClicked()
+    async cardClick () {
+      if (this.isRadioBtn === true) {
+        await this.UnclickOtherCard()
+      }
+      await this.cardClicked()
       this.sendCardInfo()
     },
     cardClicked () {
-      this.isClicked = !this.isClicked
-    },
-    cardUnClicked (event) {
-      
+      return new Promise((resolve, reject) => {
+      // this.isClicked = !this.isClicked
+        this.$refs.thisCard.classList.toggle('card-clicked')
+        resolve()
+      })
     },
     sendCardInfo () {
       this.$emit('CardInfo', this.cardInfo)
     },
-    cardDescriptionShow () {
-      
+    UnclickOtherCard () {
+      return new Promise((resolve, reject) => {
+        document.getElementsByName(this.elementName).forEach((elm, index) => {
+          elm.classList.remove('card-clicked')
+          console.log(elm.classList)
+        })
+        resolve()
+      })
     }
   }
 }
