@@ -1,12 +1,12 @@
 <template>
   <div class="">
     <div class="health-bar">
-        <div class="health"
-            :style="{'width':currentHPPercent + '%'}">
-        </div>
-    </div>
-    <div class="health-point">
-      {{ currentHP }} / {{ maxHP }}
+      <div class="health-point">
+        {{ currentHP }} / {{ maxHP }}
+      </div>
+      <div class="health"
+          :style="{'width':currentHPPercent + '%'}">
+      </div>
     </div>
   </div>
 </template>
@@ -20,8 +20,8 @@ export default {
     'isMyTurnProp',
     'who'],
   data (props) {
-    const maxHP = props.dataProp.hp ? props.dataProp.hp : 'loading'
-    const currentHP = props.dataProp.hp ? props.dataProp.hp : 'loading'
+    const maxHP = props.dataProp && props.dataProp.hp ? props.dataProp.hp : 'loading'
+    const currentHP = props.dataProp && props.dataProp.hp ? props.dataProp.hp : 'loading'
     const currentHPPercent = 100
 
     const moreGainDmg = 0
@@ -173,20 +173,25 @@ export default {
 
 <style scoped>
 .health-bar{
-    width: 100%;
-    border: 2px solid rgb(170, 120, 26);
-    padding: 2px 5px 2px 5px;
+  position: relative;
+  width: 100%;
+  border: 2px solid rgb(170, 120, 26);
+  padding: 2px 5px 2px 5px;
 }
 .health{
-    height: 20px;
-    background-image: linear-gradient(rgb(241, 16, 16), rgb(255, 222, 222), rgb(218, 76, 76));
-    transition: width .2s;
-    width: 100%;
+  height: 20px;
+  background-image: linear-gradient(rgb(241, 16, 16), rgb(255, 222, 222), rgb(218, 76, 76));
+  transition: width .2s;
+  width: 100%;
 }
 .health-point{
-  font-size: 0.7vw;
+  font-size: 0.7em;
   color: black;
   font-weight: bold;
+  position: absolute;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 @media only screen and (max-width: 500px) {
    .health{

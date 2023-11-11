@@ -12,7 +12,7 @@
             @effectValue="showEffectHPPlayer"
           />
           <div class="col"></div>
-          <HpBar class="enermy-hp col"
+          <!-- <HpBar class="enermy-hp col"
             :hpChangeActionProp="enermyHPChangeAction"
             :dataProp="gameData.enermyData" 
             :buffDebuffProp="enermyHPChangeBuffDebuff"
@@ -20,7 +20,7 @@
             :who="'enermy'"
             @finishedTurn="finishedAction()"
             @effectValue="showEffectHPEnermy"
-          />
+          /> -->
         </div>
         <div class="row">
           <div class="col">
@@ -39,8 +39,17 @@
       </b-modal>
       <div class="battle-zone" :style="{ 'background-image': 'url(' + require('@/assets/Scene/2.gif') + ')' }">
         <div class="row char-zone">
-          <Player class="chara col" />
-          <EnermyChar class="chara col"/>
+          <!-- <Player class="chara col" />-->
+          <div class="chara_group col" 
+            v-for="(enermyData ,index) in gameData.enermysData"
+            :key="index">
+            <EnermyChar class="chara"
+              :enmeryDataProp="enermyData"
+            />
+            <HpBar class="enermy-hp"/>
+            <BuffEffectShower :playerTypeProp="'enermy'"
+                              :buff_debuffEffectProp="enermyBuffDebuff"/>
+          </div>
         </div>
         <!--Effect value-->
         <div class="row effect-value-zone ">
@@ -65,7 +74,7 @@
 </template>
 
 <script>
-import Player from '@/components/GameObject/Player.vue'
+// import Player from '@/components/GameObject/Player.vue'
 import EnermyChar from '@/components/GameObject/EnermyChar.vue'
 import HpBar from '@/components/GameObject/HpBar.vue'
 import CardDeck from '@/components/GameObject/Card/CardDeck.vue'
@@ -76,7 +85,7 @@ export default {
   name: 'MainPlayer',
   props: [''],
   components: {
-    Player,
+    // Player,
     EnermyChar,
     HpBar,
     CardDeck,
@@ -88,7 +97,7 @@ export default {
       playerData: {
         hp: 150
       },
-      enermyData: {
+      enermyDatabk: {
         hp: 200,
         skill: [
           {
@@ -107,6 +116,20 @@ export default {
           }
         ]
       },
+      enermysData: [
+        {
+          name: 'enermy 1',
+          hp: 100
+        },
+        {
+          name: 'enermy 2',
+          hp: 100
+        },
+        {
+          name: 'enermy 2',
+          hp: 100
+        }
+      ],
       cardList: [
         {
           id: 1,
@@ -245,7 +268,11 @@ export default {
     const blessingCardList = []
     const enermyHPChangeAction = []
     const enermyAtkList = []
-    const enermyBuffDebuff = []
+    const enermyBuffDebuff = [
+      {
+        effectImg: 'atkup.png'
+      }
+    ]
     const enermyHPChangeBuffDebuff = {
       actionBuffDebuff: [],
       statusBuffDebuff: []

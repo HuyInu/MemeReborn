@@ -2,7 +2,7 @@
   <div>
     <span v-html="cardProp.description"></span>
     <RankText class="cardRankText" :rankProps="cardProp.rank"/>
-    <div :class="['card-frame',isClicked ? 'card-clicked' : '']" ref="thisCard" :name="elementName">
+    <div :class="['card-frame', isClicked ? 'card-clicked' : '']" ref="thisCard" :name="elementName">
         <img :class="['card-pic',getCardBorderColor(cardProp.rank)]" 
             :src="require('@/assets/CardImg/'+cardProp.cardImg)"
             @click="cardClick"
