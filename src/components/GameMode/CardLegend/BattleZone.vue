@@ -46,9 +46,11 @@
             <EnermyChar class="chara"
               :enmeryDataProp="enermyData"
             />
-            <HpBar class="enermy-hp"/>
+            <HpBar class="enermy-hp"
+              :dataProp="enermyData"
+            />
             <BuffEffectShower :playerTypeProp="'enermy'"
-                              :buff_debuffEffectProp="enermyBuffDebuff"/>
+                              :buff_debuffEffectProp="enermysActionInfo[index].enermyBuffDebuff"/>
           </div>
         </div>
         <!--Effect value-->
@@ -267,7 +269,6 @@ export default {
     }
     const blessingCardList = []
     const enermyHPChangeAction = []
-    const enermyAtkList = []
     const enermyBuffDebuff = [
       {
         effectImg: 'atkup.png'
@@ -285,6 +286,7 @@ export default {
       type: null,
       val: 0
     }
+    const enermysActionInfo = []
 
     return {
       gameData,
@@ -293,7 +295,6 @@ export default {
       playerBuffDebuff,
       playerHPChangeBuffDebuff,
       blessingCardList,
-      enermyAtkList,
       enermyBuffDebuff,
       enermyHPChangeBuffDebuff,
       gameTurn,
@@ -302,13 +303,29 @@ export default {
       cardDeckList,
       cardDeckAmount,
       effectValueToPlayer,
-      effectValueToEnermy
+      effectValueToEnermy,
+      enermysActionInfo
     }
   },
   watch: {
   },
   created () {
     this.takeCardToDeck(this.cardDeckAmount, this.gameData.cardList, this.cardDeckList)
+    this.gameData.enermysData.forEach((enermy, index) => {
+      this.enermysActionInfo[index] = {
+        enermyHPChangeAction: [],
+        enermyBuffDebuff: [
+          {
+            effectImg: 'atkup.png'
+          }
+        ],
+        enermyHPChangeBuffDebuff: {
+          actionBuffDebuff: [],
+          statusBuffDebuff: []
+        }
+      }
+    })
+    console.log(this.enermysActionInfo)
   },
   methods: {
     playerAction (actionCombo) {
