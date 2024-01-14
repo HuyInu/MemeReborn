@@ -38,28 +38,14 @@
         <p class="my-4">Hello from modal!</p>
       </b-modal>
       <div class="battle-zone" :style="{ 'background-image': 'url(' + require('@/assets/Scene/2.gif') + ')' }">
-        <div class="row char-zone">
-          <!-- <Player class="chara col" />-->
-          <div class="chara_group col" 
-            v-for="(enermyData ,index) in gameData.enermysData"
-            :key="index">
-            <EnermyChar class="chara"
-              :enmeryDataProp="enermyData"
-            />
-            <HpBar class="enermy-hp"
-              :dataProp="enermyData"
-            />
-            <BuffEffectShower :playerTypeProp="'enermy'"
-                              :buff_debuffEffectProp="enermysActionInfo[index].enermyBuffDebuff"/>
-          </div>
-        </div>
+        <CharaGroupList/>
         <!--Effect value-->
-        <div class="row effect-value-zone ">
+        <!-- <div class="row effect-value-zone ">
           <p :class="['col' ,'animate__bounceIn','effect-value', getColorEffectValue(effectValueToPlayer.type)]" v-show="effectValueToPlayer.val != 0">{{effectValueToPlayer.val}}</p>
           <p class="col" v-show="effectValueToPlayer.val == 0">&nbsp;</p>
           <p :class="['col' ,'animate__bounceIn','effect-value',getColorEffectValue(effectValueToEnermy.type)]" v-show="effectValueToEnermy.val != 0">{{effectValueToEnermy.val}}</p>
           <p class="col" v-show="effectValueToEnermy.val == 0">&nbsp;</p>
-        </div>
+        </div> -->
       </div>
           <!-- Button trigger modal -->
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" @click="takeCardToDeck(3, gameData.blessingCardList, blessingCardList)">
@@ -77,22 +63,22 @@
 
 <script>
 // import Player from '@/components/GameObject/Player.vue'
-import EnermyChar from '@/components/GameObject/EnermyChar.vue'
-import HpBar from '@/components/GameObject/HpBar.vue'
+import HpBar from '@/components/GameObject/ObjStatus/HpBar.vue'
 import CardDeck from '@/components/GameObject/Card/CardDeck.vue'
 import BuffEffectShower from '@/components/GameObject/Buff-Debuff/BuffShower.vue'
 import BlessingCardShow from '@/components/GameObject/Card/BlessingCardShow.vue'
+import CharaGroupList from '@/components/GameObject/Character/CharaGroupList.vue'
 
 export default {
   name: 'MainPlayer',
   props: [''],
   components: {
     // Player,
-    EnermyChar,
     HpBar,
     CardDeck,
     BuffEffectShower,
-    BlessingCardShow
+    BlessingCardShow,
+    CharaGroupList
   },
   data () {
     const gameData = {

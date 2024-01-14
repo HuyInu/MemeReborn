@@ -1,5 +1,5 @@
 <template>
-    <div class="main-content">
+    <div class="main-content root">
       <div class="page-content">
         <!-- Start Content-->
         <div class="container-md">
@@ -21,5 +21,7 @@ export default {
 </script>
 
 <style scoped>
-
+.root {
+  background-color: rgb(12 12 12);
+}
 </style>

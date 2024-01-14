@@ -6,7 +6,7 @@
         <img :class="['card-pic',getCardBorderColor(cardProp.rank)]" 
             :src="require('@/assets/CardImg/'+cardProp.cardImg)"
             @click="cardClick"
-            />       
+            />
     </div>
     <div class="de-buff">
       <img v-for="(cardEffect, index) in cardProp.effect" :key="index" width="30px" :src="require('@/assets/De-Buff/'+cardEffect.effectImg)">
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import RankText from '@/components/GameObject/RankText.vue'
+import RankText from '@/components/GameObject/ObjStatus/RankText.vue'
 
 export default {
   name: 'CardTemplate',

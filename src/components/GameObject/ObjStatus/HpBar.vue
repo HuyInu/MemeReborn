@@ -14,14 +14,16 @@
 <script>
 export default {
   name: 'HpBar',
-  props: ['hpChangeActionProp',
-    'dataProp',
+  props: [
+    'hpChangeActionProp',
+    'healthPoint',
     'buffDebuffProp',
     'isMyTurnProp',
-    'who'],
+    'who'
+  ],
   data (props) {
-    const maxHP = props.dataProp && props.dataProp.hp ? props.dataProp.hp : 'loading'
-    const currentHP = props.dataProp && props.dataProp.hp ? props.dataProp.hp : 'loading'
+    const maxHP = props.healthPoint && props.healthPoint ? props.healthPoint : 'loading'
+    const currentHP = props.healthPoint && props.healthPoint ? props.healthPoint : 'loading'
     const currentHPPercent = 100
 
     const moreGainDmg = 0
